@@ -63,6 +63,7 @@ function initDBConnection() {
     //When running on Bluemix, this variable will be set to a json object
     //containing all the service credentials of all the bound services
     if (process.env.VCAP_SERVICES) {
+        console.log('vcap being used');
         dbCredentials.url = getDBCredentialsUrl(process.env.VCAP_SERVICES);
     } else { //When running locally, the VCAP_SERVICES will not be set
 
@@ -73,8 +74,14 @@ function initDBConnection() {
         // Alternately you could point to a local database here instead of a
         // Bluemix service.
         // url will be in this format: https://username:password@xxxxxxxxx-bluemix.cloudant.com
-        dbCredentials.url = getDBCredentialsUrl(fs.readFileSync("vcap-local.json", "utf-8"));
+        console.log('vcap not found');
+        var binding = JSON.parse(fs.readFileSync('/opt/service-bind/binding', 'utf8'));
+        dbCredentials.url = binding.url;//getDBCredentialsUrl(fs.readFileSync("vcap-local.json", "utf-8"));
     }
+    console.log('overriding the url from binidng');
+    binding = JSON.parse(fs.readFileSync('/opt/service-bind/binding', 'utf8'));
+    console.log('binidng found is:' + binding);
+    dbCredentials.url = binding.url;//getDBCredentialsUrl(fs.readFileSync("vcap-local.json", "utf-8"));
 
     cloudant = require('cloudant')(dbCredentials.url);
 
